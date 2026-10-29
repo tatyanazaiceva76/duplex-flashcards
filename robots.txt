@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tatyanazaiceva76.github.io/duplex-flashcards/sitemap.xml

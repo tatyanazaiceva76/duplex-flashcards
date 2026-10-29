@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="index,follow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'none'; font-src 'none'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; worker-src 'none'">
+  <meta name="google-site-verification" content="fxav4NFuUbsVKkkGCwAQyVzlPy7XdI-itFY_XiKmodE" />
+  <meta name="description" content="Make paired flashcards from CSV or TSV, print a calibration pair, and apply a measured back-page offset. Browser-local text processing. A4 or Letter.">
+  <link rel="canonical" href="https://tatyanazaiceva76.github.io/duplex-flashcards/">
+  <title>Duplex Flashcard Maker With Measured Back Offset</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="eyebrow">Browser-local print lab</p>
+    <h1>Duplex flashcards with a measured back offset</h1>
+    <p>Turn one explicit two-column CSV or TSV list into paired front/back printable HTML. Start with the unshifted calibration pair; a correction moves only the BACK content.</p>
+  </header>
+
+  <main>
+    <section class="panel steps" aria-labelledby="workflow-title">
+      <h2 id="workflow-title">Three-step workflow</h2>
+      <ol>
+        <li><strong>Calibrate:</strong> download the two-page pair and print it at 100% / actual size, without browser headers or footers.</li>
+        <li><strong>Measure in BACK view:</strong> look at the BACK with its TOP marker upright. Ring right of cross = positive X; ring below cross = positive Y.</li>
+        <li><strong>Generate:</strong> enter that measured displacement. The file applies the opposite translation to BACK content only.</li>
+      </ol>
+      <div class="orientation" aria-label="Back-view measurement diagram">
+        <svg viewBox="0 0 300 120" role="img" aria-labelledby="diagram-title diagram-desc">
+          <title id="diagram-title">Back-view correction diagram</title>
+          <desc id="diagram-desc">A cross marks the front position. A ring right and down represents positive observed X and Y. The applied correction points left and up.</desc>
+          <path d="M35 60h42M56 39v42" class="cross"/><circle cx="104" cy="82" r="17" class="ring"/>
+          <path d="M104 82L62 62" class="arrow"/><text x="120" y="45">Observed BACK: +X right, +Y down</text><text x="120" y="70">Applied correction: −X, −Y</text><text x="120" y="95">TOP ↑ stays upright while measuring</text>
+        </svg>
+      </div>
+    </section>
+
+    <form id="tool" class="panel" novalidate>
+      <h2>Card data and print settings</h2>
+      <label for="input">Two-column card table: front, back</label>
+      <textarea id="input" rows="10" spellcheck="false" placeholder="front,back&#10;Question,Answer"></textarea>
+      <div class="actions compact"><button type="button" id="sample">Use sample</button><button type="button" id="reset-tool">Reset</button></div>
+
+      <div class="grid">
+        <label>Delimiter<select id="delimiter"><option value=",">Comma CSV</option><option value="&#9;">Tab TSV</option></select></label>
+        <label class="check"><input id="header" type="checkbox" checked> First row is <code>front,back</code></label>
+        <label>Paper<select id="paper"><option value="A4">A4 portrait</option><option value="LETTER">US Letter portrait</option></select></label>
+        <label>Duplex flip<select id="flip"><option value="LONG_EDGE">Long edge</option><option value="SHORT_EDGE">Short edge</option></select></label>
+        <label>Observed BACK X (mm)<input id="observed-x" type="number" min="-5" max="5" step="0.1" value="0"></label>
+        <label>Observed BACK Y (mm)<input id="observed-y" type="number" min="-5" max="5" step="0.1" value="0"></label>
+      </div>
+      <label class="check measure"><input id="measured" type="checkbox"> I measured this displacement in BACK view using the matching paper, feed, scale and flip setting.</label>
+      <p class="hint">Zero while unchecked means <strong>unmeasured / no correction</strong>, not a passed calibration. Accepted offsets are −5 to +5 mm.</p>
+
+      <div class="actions">
+        <button type="button" id="calibration">Download unshifted calibration HTML</button>
+        <button type="submit" class="primary">Generate current packet</button>
+      </div>
+      <div id="error" class="error" role="alert" aria-live="assertive" hidden></div>
+    </form>
+
+    <section id="result" class="panel" hidden aria-live="polite">
+      <div class="result-head"><div><p class="eyebrow">Frozen current result</p><h2>Preview and download</h2></div><p id="summary"></p></div>
+      <div class="actions compact"><button id="preview-front" type="button" disabled>Preview first FRONT</button><button id="preview-back" type="button" disabled>Preview first BACK</button><button id="download" type="button" class="primary" disabled>Download card packet HTML</button></div>
+      <div id="preview" class="preview" aria-label="Generated first-sheet preview"></div>
+      <p class="hint">The downloaded file is script-free HTML, not a generated or verified PDF. You may open it and use your browser’s Save as PDF or print controls at your own discretion.</p>
+    </section>
+
+    <section class="panel limits">
+      <h2>What this does — and does not do</h2>
+      <p>The tool keeps card IDs paired, mirrors BACK positions for the selected flip edge, preserves incomplete-sheet blank slots, and applies one constant translation. It does not correct skew, scale, rotation, changing feed, variable displacement across corners, printer margins, driver behavior or font differences. Test plain paper before a batch.</p>
+      <p>Generic CSV-to-duplex tools already exist, including <a href="https://thekarolgajda.github.io/Flashy/" rel="noreferrer">Flashy</a> and <a href="https://formatter.org/flashcard-maker" rel="noreferrer">Formatter’s flashcard maker</a>. Existing-PDF page shifting is available from tools such as <a href="https://pnpbuddy.com/align/" rel="noreferrer">PnP Buddy</a>. This tool composes text-table layout and a measured back-view translation; it does not claim uniqueness or a physical printer repair.</p>
+      <p><strong>Privacy:</strong> entered card text is processed in this page. The app does not upload or persist it and uses no analytics, accounts, cookies or storage. Loading these same-origin page files and choosing an external reference link still uses the network.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="print-notes-title">
+      <h2 id="print-notes-title">Before printing a full deck</h2>
+      <h3>Measure from the BACK, with TOP upright</h3>
+      <p>Hold the unshifted test sheet against light and look at its BACK. Compare the back ring with the front cross. If the ring is 3 mm right and 2 mm up, enter X = 3 and Y = −2. The back content is then moved 3 mm left and 2 mm down in that back-page view. A measurement taken while looking at the front has a different sign convention: do not enter it here.</p>
+      <p>Check several corners and another sheet. A single translation cannot repair different offsets across the page, rotation, scale changes or inconsistent paper feed. Keep the paper, driver, feed path, duplex edge and scale unchanged when testing your correction. The tool does not measure or configure your printer.</p>
+      <h3>What will I download?</h3>
+      <p>A standalone, script-free HTML document: each physical sheet has a FRONT page followed by its BACK page. Open the file in a browser and check the page count and chosen paper in Print or Save as PDF. Use actual size / 100%, turn browser headers and footers off, and match the selected flip edge. This tool does not directly create or verify a PDF. Test plain paper before printing a batch or cutting cards.</p>
+      <h3>Which table formats are supported?</h3>
+      <p>Choose comma CSV or tab TSV explicitly. With the header option checked, the first row must be front,back (or front and back separated by a tab). Both cells in every data row need text. Quoted fields may contain commas, quotes or line breaks. Up to 64 cards and 240 Unicode code points per field are accepted, but text that needs more than six lines is refused rather than clipped. No Anki package, PDF, images or vendor-specific export is read.</p>
+      <p><strong>References:</strong> <a href="https://www.avery.com/help/article/print-two-sided-print-both-sides-double-sided-printing" rel="noreferrer">Avery’s plain-paper duplex test guidance</a>, <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@page" rel="noreferrer">MDN on intended CSS print-page size</a>, and <a href="https://www.rfc-editor.org/info/rfc4180/" rel="noreferrer">RFC 4180’s informational CSV description</a>. References checked 29 October 2026. This is an independent original layout helper, not a printer service or an affiliated product.</p>
+    </section>
+  </main>
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
